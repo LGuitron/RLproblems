@@ -1,4 +1,4 @@
-# **Q-Learning in Tic Tac Toe**
+# **Q-Learning Tic Tac Toe**
 
 Q-Learning implementation for Tic Tac Toe via self play.
 In this implementation a single lookup table is stored for 3^9 states mapped with 9 possible actions.
