@@ -25,7 +25,6 @@ class State:
     #1 : Win
     #-1 : Lose
     #-0.1 : StepTaken
-    
     def reward(self, player):
         
         #Horizontal Win/Lose

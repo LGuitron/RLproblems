@@ -9,7 +9,7 @@ print("TIC TAC TOE")
 print("___________\n")
 print("Learning...")
 
-trainEpisodes = 100
+trainEpisodes = 1000
 AI = RL(0.05)
 
 Qfile = Path("Qvals.npy")
@@ -68,9 +68,9 @@ while(True):
         playerTurn = not playerTurn
 
     state.print()
-    if(R==-1):
+    if(R*currentPlayer==1):
         print("P2 wins")
-    elif(R==1):
+    elif(R*currentPlayer==-1):
         print("P1 wins")
     else:
         print("Tie")
