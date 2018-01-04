@@ -24,7 +24,7 @@ class RL:
             state = State()                                             #Init empty board              
             result = 0                                                  #Get match result (0 - Tie, 1 - P1 Win, 2 - P2 Win)
             while(True):
-                loss, updated = self.approximator.updateWeights(self.discount)                            #Make weight updates at the begining of each turn
+                loss, updated = self.approximator.updateWeightsCuda(self.discount)                            #Make weight updates at the begining of each turn
                 totalLoss += loss
                 updateCount += updated
                 '''

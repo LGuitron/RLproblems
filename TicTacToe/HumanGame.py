@@ -9,18 +9,18 @@ print("TIC TAC TOE")
 print("___________\n")
 print("Learning...")
 
-trainEpisodes = 1000
+trainEpisodes = 100000
 AI = RL(0.05)
 
 Qfile = Path("Qvals.npy")
 if Qfile.is_file():
     print("Loaded Q File")
     AI.policy.Q = numpy.load("Qvals.npy")
-    AI.QLearning(1.0,0.9,0.1,trainEpisodes)
+    AI.QLearning(0.95,0.9,0.1,trainEpisodes)
 
 else:
     print("Starting New Training")
-    AI.QLearning(1.0,0.9,0.1,trainEpisodes)
+    AI.QLearning(0.95,0.9,0.1,trainEpisodes)
 numpy.save("Qvals.npy", AI.policy.Q)
 
 '''
