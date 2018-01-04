@@ -4,6 +4,13 @@ from pathlib import Path
 import numpy
 import torch
 from torch.autograd import Variable
+import sys
+
+#Write 1 as console parameter to run on GPU
+if(len(sys.argv)>1 and str(sys.argv[1])=="1"):
+    print("GPU")
+else:
+    print("CPU")
 
 print("___________")
 print("Connect 4")
