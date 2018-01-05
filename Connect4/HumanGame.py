@@ -6,16 +6,15 @@ import torch
 from torch.autograd import Variable
 import sys
 
-#Write 1 as console parameter to run on GPU
-if(len(sys.argv)>1 and str(sys.argv[1])=="1"):
-    print("GPU")
-else:
-    print("CPU")
 
 print("___________")
 print("Connect 4")
 print("___________\n")
-print("Learning...")
+
+mode = "CPU"
+runOnGPU = len(sys.argv)>1      #If a console parameter is received run in GPU. else run on CPU
+if(runOnGPU):
+    mode = "GPU"
 
 #Learning parameters
 batch_size = 16
@@ -28,20 +27,35 @@ experience_stored = 200000
 step_delta = 1000
 
 #Number of episodes to run before displaying learning stats
-display_frequency = 10
+display_frequency = 20
 
-AI = RL(batch_size , learning_rate, epsilon,discount, _lambda, experience_stored, step_delta, display_frequency)
+AI = RL(batch_size , learning_rate, epsilon,discount, _lambda, experience_stored, step_delta, display_frequency, runOnGPU)
 
-Qfile = Path("net.pt")
-if Qfile.is_file():
-    print("Loaded Network")
-    AI.approximator = torch.load("net.pt")
-    AI.QLearning(trainEpisodes)
+#Qfile = Path("net.pt")
+CPUfile = Path("ntpCPU.pt")
+GPUfile = Path("ntpGPU.pt")
+
+if (runOnGPU and GPUfile.is_file()) or (not runOnGPU and GPUfile.is_file()):
+    print("Loaded Network", mode)
+    print("Learning...")
+    if(runOnGPU):
+        AI.approximator = torch.load("netGPU.pt")
+        AI.QLearningGPU(trainEpisodes)
+        torch.save(AI.approximator, "netGPU.pt")
+    else:
+        AI.approximator = torch.load("netCPU.pt")
+        AI.QLearningCPU(trainEpisodes)
+        torch.save(AI.approximator, "netCPU.pt")
 
 else:
-    print("Starting New Training")
-    AI.QLearning(trainEpisodes)
-torch.save(AI.approximator, "net.pt")
+    print("Starting New Training" , mode)
+    print("Learning...")
+    if(runOnGPU):
+        AI.QLearningGPU(trainEpisodes)
+        torch.save(AI.approximator, "netGPU.pt")
+    else:
+        AI.QLearningCPU(trainEpisodes)
+        torch.save(AI.approximator, "netCPU.pt")
 
 
 while(True):
@@ -55,14 +69,14 @@ while(True):
 
     if(val=="1"):
         playerTurn = True
-        
+
     while((R!=-2.2 and R!=2.2) and state.movesLeft>0):
         state.print("+","-","0")
-        
+
         #Player Moves
         if(playerTurn):
             #Check that the player introduced an avaiable move
-            
+
             while(True):
                 val = input("\nYour Move (1 - 7): ")
                 A = eval(val)-1
@@ -75,21 +89,21 @@ while(True):
         else:
             print("\n AI Moved")
             inputTensor[0] = torch.FloatTensor(stateVector)
-            A = AI.approximator.bestAction(Variable(inputTensor), state.avMoves) 
+            A = AI.approximator.bestAction(Variable(inputTensor), state.avMoves)
         state.act(A)
         stateVector = state.getTensor()
         R = state.reward()
         playerTurn = not playerTurn
 
     state.print("+","-","0")
-    
+
     if(R!=-2.2 and R!=2.2):
         print("Tie")
     elif(R and playerTurn):
         print("AI wins")
     else:
         print("You win")
-    
+
     val = input("\nEnter 1 to play another game: ")
     if(val!="1"):
         break
