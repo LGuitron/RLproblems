@@ -17,12 +17,12 @@ if(runOnGPU):
     mode = "GPU"
 
 #Learning parameters
-batch_size = 16
+batch_size = 128
 learning_rate = 0.0001
-epsilon = 0.02
+epsilon = 0.1
 discount = 0.95
 _lambda = 0.80
-trainEpisodes = 7000
+trainEpisodes = 700
 experience_stored = 1000000
 step_delta = 1000
 

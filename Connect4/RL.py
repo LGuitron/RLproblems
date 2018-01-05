@@ -4,6 +4,7 @@ from Approximator import Approximator
 import torch
 from torch.autograd import Variable
 import numpy
+import time
 '''
 
     Q-Learning
@@ -23,7 +24,8 @@ class RL:
     def QLearningCPU(self, episodes):
         matchRecord = [0]*3
         totalLoss = 0                                                   #Store the total loss from weight updates
-        updateCount= 0                                                  #Store amount of updates made to calculate average loss
+        updateCount = 0                                                 #Store amount of updates made to calculate average loss
+        initialTime =  time.time()                                      #Record time required for specified number of episodes
         for i in range(episodes):
             state = State()                                             #Init empty board
             while(True):
@@ -40,7 +42,7 @@ class RL:
                 R1 = state.reward()                                                                    #Immediate reward for P1
 
                 #If P1 won with its previous move update weights for its last action, as well as P2's last action
-                if(R1==2.2):
+                if(R1==1):
                     self.approximator.addExperience(Transition(tensor1_bef, A1, R1, tensor1_new, False))           #Store transition information from P1 interactions
                     self.approximator.addExperience(Transition(tensor2_bef, A2, -1*R1, tensor2_new, False))        #Store transition information from P2 interactions
                     matchRecord[0]+=1
@@ -59,7 +61,7 @@ class RL:
                 R2 = state.reward()                                                                     #Check P2 Win
 
                 #If P2 won with its previous move update both P1 and P2 Q values
-                if(R2==2.2):
+                if(R2==1):
                     self.approximator.addExperience(Transition(tensor1_bef, A1, -1*R2, tensor1_new, False))     #Store transition information from P1 interactions
                     self.approximator.addExperience(Transition(tensor2_bef, A2, R2, tensor2_new, False))        #Store transition information from P2 interactions
                     matchRecord[2]+=1
@@ -75,11 +77,14 @@ class RL:
 
             #display match stats
             if((i+1)%self.display_frequency==0):
-                matchRecord
-                print("P1: ", 100*matchRecord[0]/self.display_frequency, "% T: " , 100*matchRecord[1]/self.display_frequency, "% P2: " , 100*matchRecord[2]/self.display_frequency, "%        LOSS: " , totalLoss/updateCount)
+                if(updateCount>0):
+                    print("P1: ", 100*matchRecord[0]/self.display_frequency, "% T: " , 100*matchRecord[1]/self.display_frequency, "% P2: " , 100*matchRecord[2]/self.display_frequency, "%  ep_time: ", round((time.time()-initialTime)/self.display_frequency, 3)  ,  "s LOSS: " , totalLoss/updateCount)
+                else:
+                    print("P1: ", 100*matchRecord[0]/self.display_frequency, "% T: " , 100*matchRecord[1]/self.display_frequency, "% P2: " , 100*matchRecord[2]/self.display_frequency, "%  ep_time: ", round((time.time()-initialTime)/self.display_frequency, 3))
                 matchRecord = [0]*3
                 totalLoss=0
                 updateCount=0
+                initialTime = time.time()
 
     '''
     GPU
@@ -89,6 +94,7 @@ class RL:
         matchRecord = [0]*3
         totalLoss = 0                                                   #Store the total loss from weight updates
         updateCount= 0                                                  #Store amount of updates made to calculate average loss
+        initialTime =  time.time()                                      #Record time required for specified number of episodes
         for i in range(episodes):
             state = State()                                             #Init empty board
             while(True):
@@ -105,7 +111,7 @@ class RL:
                 R1 = state.reward()                                                                    #Immediate reward for P1
 
                 #If P1 won with its previous move update weights for its last action, as well as P2's last action
-                if(R1==2.2):
+                if(R1==1):
                     self.approximator.addExperience(Transition(tensor1_bef, A1, R1, tensor1_new, False))           #Store transition information from P1 interactions
                     self.approximator.addExperience(Transition(tensor2_bef, A2, -1*R1, tensor2_new, False))        #Store transition information from P2 interactions
                     matchRecord[0]+=1
@@ -124,7 +130,7 @@ class RL:
                 R2 = state.reward()                                                                     #Check P2 Win
 
                 #If P2 won with its previous move update both P1 and P2 Q values
-                if(R2==2.2):
+                if(R2==1):
                     self.approximator.addExperience(Transition(tensor1_bef, A1, -1*R2, tensor1_new, False))     #Store transition information from P1 interactions
                     self.approximator.addExperience(Transition(tensor2_bef, A2, R2, tensor2_new, False))        #Store transition information from P2 interactions
                     matchRecord[2]+=1
@@ -140,8 +146,11 @@ class RL:
 
             #display match stats
             if((i+1)%self.display_frequency==0):
-                matchRecord
-                print("P1: ", 100*matchRecord[0]/self.display_frequency, "% T: " , 100*matchRecord[1]/self.display_frequency, "% P2: " , 100*matchRecord[2]/self.display_frequency, "%        LOSS: " , totalLoss/updateCount)
+                if(updateCount>0):
+                    print("P1: ", 100*matchRecord[0]/self.display_frequency, "% T: " , 100*matchRecord[1]/self.display_frequency, "% P2: " , 100*matchRecord[2]/self.display_frequency, "%  ep_time: ", round((time.time()-initialTime)/self.display_frequency, 3)  ,  "s LOSS: " , totalLoss/updateCount)
+                else:
+                    print("P1: ", 100*matchRecord[0]/self.display_frequency, "% T: " , 100*matchRecord[1]/self.display_frequency, "% P2: " , 100*matchRecord[2]/self.display_frequency, "%  ep_time: ", round((time.time()-initialTime)/self.display_frequency, 3))
                 matchRecord = [0]*3
                 totalLoss=0
                 updateCount=0
+                initialTime = time.time()
