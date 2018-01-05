@@ -178,12 +178,6 @@ class Approximator():
                                                #0 or a 1 to indicate if an update was made (useful for calculating avg loss after many updates)
         return 0,0
 
-        self.state1 = state1
-        self.action = action
-        self.reward = reward
-        self.state2 = state2
-        self.avMoves2 = avMoves2
-
     def saveExperience(self, filename):
         with open(filename, 'wb') as output:
             for i in range(len(self.experience)):

@@ -17,12 +17,12 @@ if(runOnGPU):
     mode = "GPU"
 
 #Learning parameters
-batch_size = 128
-learning_rate = 0.0001
-epsilon = 0.1
+batch_size = 64
+learning_rate = 0.000001
+epsilon = 0.05
 discount = 0.95
 _lambda = 0.80
-trainEpisodes = 700
+trainEpisodes = 10000
 experience_stored = 1000000
 step_delta = 1000
 
@@ -73,7 +73,7 @@ while(True):
     if(val=="1"):
         playerTurn = True
 
-    while((R!=-2.2 and R!=2.2) and state.movesLeft>0):
+    while((R!=-1 and R!=1) and state.movesLeft>0):
         state.print("+","-","0")
 
         #Player Moves
@@ -103,7 +103,7 @@ while(True):
 
     state.print("+","-","0")
 
-    if(R!=-2.2 and R!=2.2):
+    if(R!=-1 and R!=1):
         print("Tie")
     elif(R and playerTurn):
         print("AI wins")

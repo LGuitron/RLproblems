@@ -6,9 +6,7 @@ from torch.autograd import Variable
 import numpy
 import time
 '''
-
     Q-Learning
-
 '''
 class RL:
 
@@ -17,21 +15,25 @@ class RL:
         self.discount = discount
         self.display_frequency = display_frequency
 
+        #Variables used for displaying learning stats
+        self.matchRecord = [0]*3
+        self.totalLoss = 0                                                   #Store the total loss from weight updates
+        self.totalGameLength = 0                                             #Store game duration for later stats
+        self.updateCount = 0                                                 #Store amount of updates made to calculate average loss
+        self.initialTime =  time.time()                                      #Record time required for specified number of episodes
+
     '''
-    CPU
+    CPU Learning
     '''
 
     def QLearningCPU(self, episodes):
-        matchRecord = [0]*3
-        totalLoss = 0                                                   #Store the total loss from weight updates
-        updateCount = 0                                                 #Store amount of updates made to calculate average loss
-        initialTime =  time.time()                                      #Record time required for specified number of episodes
+        self.initialTime = time.time()
         for i in range(episodes):
             state = State()                                             #Init empty board
             while(True):
                 loss, updated = self.approximator.updateWeightsCPU(self.discount)                            #Make weight updates at the begining of each turn
-                totalLoss += loss
-                updateCount += updated
+                self.totalLoss += loss
+                self.updateCount += updated
                 '''
                 #P1 Turn
                 '''
@@ -41,16 +43,10 @@ class RL:
                 tensor2_new = state.getTensor()                                                        #Resulting state from P2 perspective
                 R1 = state.reward()                                                                    #Immediate reward for P1
 
-                #If P1 won with its previous move update weights for its last action, as well as P2's last action
-                if(R1==1):
-                    self.approximator.addExperience(Transition(tensor1_bef, A1, R1, tensor1_new, False))           #Store transition information from P1 interactions
-                    self.approximator.addExperience(Transition(tensor2_bef, A2, -1*R1, tensor2_new, False))        #Store transition information from P2 interactions
-                    matchRecord[0]+=1
-                    break
+                if(state.movesLeft<41):                                                                #Store transactions starting in the second turn
+                    if(self.P1turnTransactions(tensor1_bef, tensor1_new, tensor2_bef, tensor2_new, A1, A2, R1, R2, state)):
+                        break
 
-                #If P2 has made at least one move update Q values from P2 actions
-                if(state.movesLeft<41):
-                    self.approximator.addExperience(Transition(tensor2_bef, A2, R2, tensor2_new, state.avMoves))  #Store transition information from P2 interactions
                 '''
                 #P2 Turn
                 '''
@@ -60,47 +56,22 @@ class RL:
                 tensor1_new = state.getTensor()                                                         #Resulting state from P1 perspective
                 R2 = state.reward()                                                                     #Check P2 Win
 
-                #If P2 won with its previous move update both P1 and P2 Q values
-                if(R2==1):
-                    self.approximator.addExperience(Transition(tensor1_bef, A1, -1*R2, tensor1_new, False))     #Store transition information from P1 interactions
-                    self.approximator.addExperience(Transition(tensor2_bef, A2, R2, tensor2_new, False))        #Store transition information from P2 interactions
-                    matchRecord[2]+=1
+                if(self.P2turnTransactions(tensor1_bef, tensor1_new, tensor2_bef, tensor2_new, A1, A2, R1, R2, state)):
                     break
-
-                #Update weights for P1 actions
-                if(state.movesLeft>0):                                                                          #Game continues
-                    self.approximator.addExperience(Transition(tensor1_bef, A1, R1, tensor1_new, state.avMoves)) #Store transition information from P1 interactions
-                else:                                                                                   #Game tied
-                    self.approximator.addExperience(Transition(tensor1_bef, A1, R1, tensor1_new, False)) #Store transition information from P1 interactions
-                    matchRecord[1]+=1
-                    break
-
-            #display match stats
-            if((i+1)%self.display_frequency==0):
-                if(updateCount>0):
-                    print("P1: ", 100*matchRecord[0]/self.display_frequency, "% T: " , 100*matchRecord[1]/self.display_frequency, "% P2: " , 100*matchRecord[2]/self.display_frequency, "%  ep_time: ", round((time.time()-initialTime)/self.display_frequency, 3)  ,  "s LOSS: " , totalLoss/updateCount)
-                else:
-                    print("P1: ", 100*matchRecord[0]/self.display_frequency, "% T: " , 100*matchRecord[1]/self.display_frequency, "% P2: " , 100*matchRecord[2]/self.display_frequency, "%  ep_time: ", round((time.time()-initialTime)/self.display_frequency, 3))
-                matchRecord = [0]*3
-                totalLoss=0
-                updateCount=0
-                initialTime = time.time()
+            self.displayStats(i)
 
     '''
-    GPU
+    GPU Learning
     '''
 
     def QLearningGPU(self, episodes):
-        matchRecord = [0]*3
-        totalLoss = 0                                                   #Store the total loss from weight updates
-        updateCount= 0                                                  #Store amount of updates made to calculate average loss
-        initialTime =  time.time()                                      #Record time required for specified number of episodes
+        self.initialTime = time.time()
         for i in range(episodes):
             state = State()                                             #Init empty board
             while(True):
                 loss, updated = self.approximator.updateWeightsGPU(self.discount)                            #Make weight updates at the begining of each turn
-                totalLoss += loss
-                updateCount += updated
+                self.totalLoss += loss
+                self.updateCount += updated
                 '''
                 #P1 Turn
                 '''
@@ -110,16 +81,9 @@ class RL:
                 tensor2_new = state.getTensor()                                                        #Resulting state from P2 perspective
                 R1 = state.reward()                                                                    #Immediate reward for P1
 
-                #If P1 won with its previous move update weights for its last action, as well as P2's last action
-                if(R1==1):
-                    self.approximator.addExperience(Transition(tensor1_bef, A1, R1, tensor1_new, False))           #Store transition information from P1 interactions
-                    self.approximator.addExperience(Transition(tensor2_bef, A2, -1*R1, tensor2_new, False))        #Store transition information from P2 interactions
-                    matchRecord[0]+=1
-                    break
-
-                #If P2 has made at least one move update Q values from P2 actions
-                if(state.movesLeft<41):
-                    self.approximator.addExperience(Transition(tensor2_bef, A2, R2, tensor2_new, state.avMoves))  #Store transition information from P2 interactions
+                if(state.movesLeft<41):                                                                #Store transactions starting in the second turn
+                    if(self.P1turnTransactions(tensor1_bef, tensor1_new, tensor2_bef, tensor2_new, A1, A2, R1, R2, state)):
+                        break
                 '''
                 #P2 Turn
                 '''
@@ -129,28 +93,58 @@ class RL:
                 tensor1_new = state.getTensor()                                                         #Resulting state from P1 perspective
                 R2 = state.reward()                                                                     #Check P2 Win
 
-                #If P2 won with its previous move update both P1 and P2 Q values
-                if(R2==1):
-                    self.approximator.addExperience(Transition(tensor1_bef, A1, -1*R2, tensor1_new, False))     #Store transition information from P1 interactions
-                    self.approximator.addExperience(Transition(tensor2_bef, A2, R2, tensor2_new, False))        #Store transition information from P2 interactions
-                    matchRecord[2]+=1
+                if(self.P2turnTransactions(tensor1_bef, tensor1_new, tensor2_bef, tensor2_new, A1, A2, R1, R2, state)):
                     break
+            self.displayStats(i)
 
-                #Update weights for P1 actions
-                if(state.movesLeft>0):                                                                          #Game continues
-                    self.approximator.addExperience(Transition(tensor1_bef, A1, R1, tensor1_new, state.avMoves)) #Store transition information from P1 interactions
-                else:                                                                                   #Game tied
-                    self.approximator.addExperience(Transition(tensor1_bef, A1, R1, tensor1_new, False)) #Store transition information from P1 interactions
-                    matchRecord[1]+=1
-                    break
+    '''
+    Other functions (apply for both GPU and CPU)
+    '''
+    #Function for displaying execution stats
+    def displayStats(self,i):
+        if((i+1)%self.display_frequency==0):
+            if(self.updateCount>0):
+                print("P1:", 100*self.matchRecord[0]/self.display_frequency, "%   T:" , 100*self.matchRecord[1]/self.display_frequency, "%   P2:" , 100*self.matchRecord[2]/self.display_frequency, "%   ep_time: ", round((time.time()-self.initialTime)/self.display_frequency, 3)  ,"  ep_length:" , round(self.totalGameLength/self.display_frequency, 1), "  LOSS: " , self.totalLoss/self.updateCount)
+            else:
+                print("P1:", 100*self.matchRecord[0]/self.display_frequency, "%   T:" , 100*self.matchRecord[1]/self.display_frequency, "%   P2:" , 100*self.matchRecord[2]/self.display_frequency, "%   ep_time: ", round((time.time()-self.initialTime)/self.display_frequency, 3),"  ep_length:" , round(self.totalGameLength/self.display_frequency, 1))
+            self.matchRecord = [0]*3
+            self.totalLoss=0
+            self.updateCount=0
+            self.totalGameLength = 0
+            self.initialTime = time.time()
 
-            #display match stats
-            if((i+1)%self.display_frequency==0):
-                if(updateCount>0):
-                    print("P1: ", 100*matchRecord[0]/self.display_frequency, "% T: " , 100*matchRecord[1]/self.display_frequency, "% P2: " , 100*matchRecord[2]/self.display_frequency, "%  ep_time: ", round((time.time()-initialTime)/self.display_frequency, 3)  ,  "s LOSS: " , totalLoss/updateCount)
-                else:
-                    print("P1: ", 100*matchRecord[0]/self.display_frequency, "% T: " , 100*matchRecord[1]/self.display_frequency, "% P2: " , 100*matchRecord[2]/self.display_frequency, "%  ep_time: ", round((time.time()-initialTime)/self.display_frequency, 3))
-                matchRecord = [0]*3
-                totalLoss=0
-                updateCount=0
-                initialTime = time.time()
+
+    #Store transactions after player 1 turn
+    def P1turnTransactions(self, tensor1_bef, tensor1_new, tensor2_bef, tensor2_new, A1, A2, R1, R2, state):
+        #If P1 won with its previous move update weights for its last action, as well as P2's last action
+        if(R1==1):
+            self.approximator.addExperience(Transition(tensor1_bef, A1, R1, tensor1_new, False))           #Store transition information from P1 interactions
+            self.approximator.addExperience(Transition(tensor2_bef, A2, -1*R1, tensor2_new, False))        #Store transition information from P2 interactions
+            self.matchRecord[0]+=1
+            self.totalGameLength += 42 - state.movesLeft
+            return True     #Game ended
+
+        #If P2 has made at least one move update Q values from P2 actions
+        else:
+            self.approximator.addExperience(Transition(tensor2_bef, A2, R2, tensor2_new, state.avMoves))  #Store transition information from P2 interactions
+        return False        #Game continues
+
+    def P2turnTransactions(self, tensor1_bef, tensor1_new, tensor2_bef, tensor2_new, A1, A2, R1, R2, state):
+        #If P2 won with its previous move update both P1 and P2 Q values
+        if(R2==1):
+            self.approximator.addExperience(Transition(tensor1_bef, A1, -1*R2, tensor1_new, False))     #Store transition information from P1 interactions
+            self.approximator.addExperience(Transition(tensor2_bef, A2, R2, tensor2_new, False))        #Store transition information from P2 interactions
+            self.matchRecord[2]+=1
+            self.totalGameLength += 42 - state.movesLeft
+            return True     #Game ended
+
+        #Update weights for P1 actions
+        if(state.movesLeft>0):                                                                              #Game continues
+            self.approximator.addExperience(Transition(tensor1_bef, A1, R1, tensor1_new, state.avMoves))    #Store transition information from P1 interactions
+        else:                                                                                               #Game tied
+            self.approximator.addExperience(Transition(tensor1_bef, A1, R1, tensor1_new, False))            #Store transition information from P1 interactions
+            self.approximator.addExperience(Transition(tensor2_bef, A2, R2, tensor2_new, False))            #Store transition information from P2 interactions
+            self.matchRecord[1]+=1
+            self.totalGameLength += 42
+            return True     #Game ended
+        return False        #Game continues
