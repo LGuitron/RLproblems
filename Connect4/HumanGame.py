@@ -19,23 +19,24 @@ if(runOnGPU):
 #Learning parameters
 batch_size = 16
 learning_rate = 0.0001
-epsilon = 0.005
+epsilon = 0.02
 discount = 0.95
 _lambda = 0.80
-trainEpisodes = 100000
-experience_stored = 200000
+trainEpisodes = 7000
+experience_stored = 1000000
 step_delta = 1000
 
 #Number of episodes to run before displaying learning stats
-display_frequency = 20
+display_frequency = 100
 
 AI = RL(batch_size , learning_rate, epsilon,discount, _lambda, experience_stored, step_delta, display_frequency, runOnGPU)
 
-#Qfile = Path("net.pt")
-CPUfile = Path("ntpCPU.pt")
-GPUfile = Path("ntpGPU.pt")
+CPUfile = Path("netCPU.pt")
+GPUfile = Path("netGPU.pt")
 
-if (runOnGPU and GPUfile.is_file()) or (not runOnGPU and GPUfile.is_file()):
+#Load experience information from previous sessions
+AI.approximator.loadExperience("experience.pkl")
+if (runOnGPU and GPUfile.is_file()) or (not runOnGPU and CPUfile.is_file()):
     print("Loaded Network", mode)
     print("Learning...")
     if(runOnGPU):
@@ -57,6 +58,8 @@ else:
         AI.QLearningCPU(trainEpisodes)
         torch.save(AI.approximator, "netCPU.pt")
 
+#Store experience information in text file for later training sessions
+AI.approximator.saveExperience("experience.pkl")
 
 while(True):
     val = input("\nEnter 1 to go first, enter otherwise to go second: ")
@@ -89,7 +92,10 @@ while(True):
         else:
             print("\n AI Moved")
             inputTensor[0] = torch.FloatTensor(stateVector)
-            A = AI.approximator.bestAction(Variable(inputTensor), state.avMoves)
+            if(runOnGPU):
+                A = AI.approximator.bestAction(Variable(inputTensor).cuda(), state.avMoves)
+            else:
+                A = AI.approximator.bestAction(Variable(inputTensor), state.avMoves)
         state.act(A)
         stateVector = state.getTensor()
         R = state.reward()

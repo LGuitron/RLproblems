@@ -5,18 +5,19 @@ class QNet(torch.nn.Module):
 
     def __init__(self):
         super(QNet, self).__init__()
-        self.conv1 = torch.nn.Conv2d(2, 64, 3)                      #64 3x3 filters (4x5)
-        self.conv2 = torch.nn.Conv2d(64, 128, 2)                    #128 3x3 filters (3x4)
-        self.conv3 = torch.nn.Conv2d(128, 256, 2)                   #256 3x3 filters (2x3)
-        self.conv4 = torch.nn.Conv2d(256, 512, 2)                   #512 3x3 filters (1x2)
-        self.fc = torch.nn.Linear(1024, 7)                          #Connect all 512 hidden units to 7 possible outputs
+        self.conv_bn = torch.nn.BatchNorm2d(32)
+        self.initial_conv = torch.nn.Conv2d(2, 32, 3, padding=1)        #32 3x3 filters
+        self.res_conv = torch.nn.Conv2d(32, 32, 3, padding=1)           #32 3x3 filters (4x5)
+        self.fc = torch.nn.Linear(1344, 7)                              #Connect all 1344 hidden units to 7 possible outputs
 
     def forward(self, x):
-        x = F.relu(self.conv1(x))
-        x = F.relu(self.conv2(x))
-        x = F.relu(self.conv3(x))
-        x = F.relu(self.conv4(x))
-        x = x.view(-1, 1024)
-        x = F.relu(self.fc(x))
+        x = F.relu(self.conv_bn(self.initial_conv(x)))                  #Initial convolution
 
+        for i in range(5):                                              #Amount of residual blocks to be applied
+            temp = F.relu(self.conv_bn(self.res_conv(x)))
+            temp = self.conv_bn(self.res_conv(temp))
+            x = F.relu(temp+x)
+
+        x = x.view(-1, 1344)
+        x = F.relu(self.fc(x))
         return x

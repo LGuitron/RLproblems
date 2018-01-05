@@ -4,7 +4,8 @@ from copy import deepcopy
 from QNet import QNet
 import numpy
 import random
-
+import pickle
+from pathlib import Path
 
 class Approximator():
 
@@ -176,3 +177,26 @@ class Approximator():
             return loss.data[0], 1             #Return loss from this update, as well as a
                                                #0 or a 1 to indicate if an update was made (useful for calculating avg loss after many updates)
         return 0,0
+
+        self.state1 = state1
+        self.action = action
+        self.reward = reward
+        self.state2 = state2
+        self.avMoves2 = avMoves2
+
+    def saveExperience(self, filename):
+        with open(filename, 'wb') as output:
+            for i in range(len(self.experience)):
+                pickle.dump(self.experience[i], output, pickle.HIGHEST_PROTOCOL)
+        print("Saved transitions: " , len(self.experience))
+
+    def loadExperience(self, filename):
+        expfile = Path(filename)
+        if expfile.is_file():
+            with open(filename, 'rb') as input:
+                while True:
+                    try:
+                        self.experience.append(pickle.load(input))
+                    except EOFError:
+                        break
+        print("Loaded transitions: " , len(self.experience))
