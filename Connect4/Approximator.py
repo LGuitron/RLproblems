@@ -15,12 +15,13 @@ class Approximator():
     #_lambda - Lambda value for Q-target
     #experience_stored - Number of states cached for experience replay
     #step_delta - Step difference between the target NN, and the NN currently being updated
-    def __init__(self, batch_size, learning_rate, epsilon, _lambda , experience_stored, step_delta, runOnGPU):
+    def __init__(self, batch_size, learning_rate, initial_epsilon, epsilon_decay, _lambda , experience_stored, step_delta, runOnGPU):
 
         self.network = QNet()
         if(runOnGPU):
             self.network.cuda()
-        self.epsilon = epsilon
+        self.epsilon = initial_epsilon
+        self.epsilon_decay = epsilon_decay
         self.targetNetwork = deepcopy(self.network)         #Fixed model used for target values for error calculation
         self.loss_fn = torch.nn.MSELoss(size_average=False)
         self.optimizer = torch.optim.SGD(self.network.parameters(), lr=learning_rate)
@@ -177,6 +178,9 @@ class Approximator():
             return loss.data[0], 1             #Return loss from this update, as well as a
                                                #0 or a 1 to indicate if an update was made (useful for calculating avg loss after many updates)
         return 0,0
+
+    def decayEpsilon(self):
+        self.epsilon = self.epsilon*self.epsilon_decay
 
     def saveExperience(self, filename):
         with open(filename, 'wb') as output:

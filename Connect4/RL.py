@@ -10,8 +10,8 @@ import time
 '''
 class RL:
 
-    def __init__(self, batch_size, learning_rate , epsilon, discount , _lambda, experience_stored, step_delta, display_frequency, runOnGPU):
-        self.approximator = Approximator(batch_size,learning_rate, epsilon, _lambda, experience_stored, step_delta, runOnGPU)
+    def __init__(self, batch_size, learning_rate , initial_epsilon, epsilon_decay ,discount , _lambda, experience_stored, step_delta, display_frequency, runOnGPU):
+        self.approximator = Approximator(batch_size,learning_rate, initial_epsilon, epsilon_decay, _lambda, experience_stored, step_delta, runOnGPU)
         self.discount = discount
         self.display_frequency = display_frequency
 
@@ -21,7 +21,6 @@ class RL:
         self.totalGameLength = 0                                             #Store game duration for later stats
         self.updateCount = 0                                                 #Store amount of updates made to calculate average loss
         self.initialTime =  time.time()                                      #Record time required for specified number of episodes
-
     '''
     CPU Learning
     '''
@@ -30,6 +29,7 @@ class RL:
         self.initialTime = time.time()
         for i in range(episodes):
             state = State()                                             #Init empty board
+            self.approximator.decayEpsilon()                            #Decay epsilon once per episode
             while(True):
                 loss, updated = self.approximator.updateWeightsCPU(self.discount)                            #Make weight updates at the begining of each turn
                 self.totalLoss += loss
@@ -68,6 +68,7 @@ class RL:
         self.initialTime = time.time()
         for i in range(episodes):
             state = State()                                             #Init empty board
+            self.approximator.decayEpsilon()                            #Decay epsilon once per episode
             while(True):
                 loss, updated = self.approximator.updateWeightsGPU(self.discount)                            #Make weight updates at the begining of each turn
                 self.totalLoss += loss
@@ -104,9 +105,9 @@ class RL:
     def displayStats(self,i):
         if((i+1)%self.display_frequency==0):
             if(self.updateCount>0):
-                print("P1:", 100*self.matchRecord[0]/self.display_frequency, "%   T:" , 100*self.matchRecord[1]/self.display_frequency, "%   P2:" , 100*self.matchRecord[2]/self.display_frequency, "%   ep_time: ", round((time.time()-self.initialTime)/self.display_frequency, 3)  ,"  ep_length:" , round(self.totalGameLength/self.display_frequency, 1), "  LOSS: " , self.totalLoss/self.updateCount)
+                print("P1:", 100*self.matchRecord[0]/self.display_frequency, "%   T:" , 100*self.matchRecord[1]/self.display_frequency, "%   P2:" , 100*self.matchRecord[2]/self.display_frequency, "%   ep_time: ", round((time.time()-self.initialTime)/self.display_frequency, 3)  ,"  ep_length:" , round(self.totalGameLength/self.display_frequency, 1), "  LOSS:" , self.totalLoss/self.updateCount, " epsilon:" , round(self.approximator.epsilon,4))
             else:
-                print("P1:", 100*self.matchRecord[0]/self.display_frequency, "%   T:" , 100*self.matchRecord[1]/self.display_frequency, "%   P2:" , 100*self.matchRecord[2]/self.display_frequency, "%   ep_time: ", round((time.time()-self.initialTime)/self.display_frequency, 3),"  ep_length:" , round(self.totalGameLength/self.display_frequency, 1))
+                print("P1:", 100*self.matchRecord[0]/self.display_frequency, "%   T:" , 100*self.matchRecord[1]/self.display_frequency, "%   P2:" , 100*self.matchRecord[2]/self.display_frequency, "%   ep_time: ", round((time.time()-self.initialTime)/self.display_frequency, 3),"  ep_length:" , round(self.totalGameLength/self.display_frequency, 1), " epsilon:" , round(self.approximator.epsilon,4))
             self.matchRecord = [0]*3
             self.totalLoss=0
             self.updateCount=0
