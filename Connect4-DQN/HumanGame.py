@@ -22,16 +22,15 @@ learning_rate = 0.000001
 initial_epsilon = 0.25
 epsilon_decay = 0.999997        #This decay value achieves 0.97 in episode 10,000, 0.74 in episode 100,000, 0.05 in episode 1,000,000
 discount = 0.95
-_lambda = 0.80
 trainEpisodes = 40000
 experience_stored = 1000000
 step_delta = 1000
 
 
 #Number of episodes to run before displaying learning stats
-display_frequency = 100
+display_frequency = 10
 
-AI = RL(batch_size , learning_rate, initial_epsilon, epsilon_decay, discount, _lambda, experience_stored, step_delta, display_frequency, runOnGPU)
+AI = RL(batch_size , learning_rate, initial_epsilon, epsilon_decay, discount, experience_stored, step_delta, display_frequency, runOnGPU)
 
 CPUfile = Path("netCPU.pt")
 GPUfile = Path("netGPU.pt")

@@ -10,8 +10,8 @@ import time
 '''
 class RL:
 
-    def __init__(self, batch_size, learning_rate , initial_epsilon, epsilon_decay ,discount , _lambda, experience_stored, step_delta, display_frequency, runOnGPU):
-        self.approximator = Approximator(batch_size,learning_rate, initial_epsilon, epsilon_decay, _lambda, experience_stored, step_delta, runOnGPU)
+    def __init__(self, batch_size, learning_rate , initial_epsilon, epsilon_decay ,discount, experience_stored, step_delta, display_frequency, runOnGPU):
+        self.approximator = Approximator(batch_size,learning_rate, initial_epsilon, epsilon_decay, experience_stored, step_delta, runOnGPU)
         self.discount = discount
         self.display_frequency = display_frequency
 

@@ -12,10 +12,9 @@ class Approximator():
     #N - batch size
     #learning_rate - Step size
     #epsilon - Exploration parameter (probability of random action)
-    #_lambda - Lambda value for Q-target
     #experience_stored - Number of states cached for experience replay
     #step_delta - Step difference between the target NN, and the NN currently being updated
-    def __init__(self, batch_size, learning_rate, initial_epsilon, epsilon_decay, _lambda , experience_stored, step_delta, runOnGPU):
+    def __init__(self, batch_size, learning_rate, initial_epsilon, epsilon_decay, experience_stored, step_delta, runOnGPU):
 
         self.network = QNet()
         if(runOnGPU):
@@ -26,7 +25,6 @@ class Approximator():
         self.loss_fn = torch.nn.MSELoss(size_average=False)
         self.optimizer = torch.optim.SGD(self.network.parameters(), lr=learning_rate)
 
-        self._lambda = _lambda
         self.batch_size = batch_size
         self.step_delta = step_delta
 
