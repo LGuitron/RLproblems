@@ -4,7 +4,7 @@ from RandomAgent import RandomAgent
 from HumanAgent import HumanAgent
 from QAgent import QAgent
 
-games              = 1000
+games              = 100000
 board_size         = (5,5)
 connections_to_win = 3
 p1                 = QAgent(board_size, isPlayer1 = True)

@@ -5,6 +5,5 @@ class RandomAgent:
     def play(self, state, actions, reward):
         return random.choice(actions)
     
-    def receive_last_reward(self, reward):
+    def receive_last_reward(self, final_state, reward):
         pass
-        #print("Reward Random: " , reward)

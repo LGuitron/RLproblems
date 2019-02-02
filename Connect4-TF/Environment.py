@@ -111,8 +111,8 @@ class Environment:
             
             # Game ended (Give final reward to both players)
             if connected_count >= self.connections_to_win:
-                self.players[self.turn].receive_last_reward(self.win_reward)
-                self.players[1-self.turn].receive_last_reward(-1*self.win_reward)
+                self.players[self.turn].receive_last_reward(self.board, self.win_reward)
+                self.players[1-self.turn].receive_last_reward(self.board, -1*self.win_reward)
                 self.winner = self.turn
                 return True
             
