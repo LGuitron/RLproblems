@@ -1,12 +1,10 @@
 import numpy as np
-#import torch
-#from math import floor
 
 class Environment:
 
     '''
     Input:
-    tuple board_size   - board's width and height
+    tuple board_size   - board's dimensions
     connections_to_win - number of chips to connect in any direction to win
     '''
     def __init__(self , p1, p2, board_size = (6,7), connections_to_win=4):
@@ -44,10 +42,13 @@ class Environment:
     '''
     def request_action(self):
         
+        # Check if opponent won the game on its last turn, in that case return done=True
+        #if 
+        
         # If there are no more actions available the game ended in a tie
         if len(self.action_space) == 0:
-            self.players[self.turn].receive_last_reward(self.tie_reward)
-            self.players[1-self.turn].receive_last_reward(self.tie_reward)
+            self.players[self.turn].receive_last_reward(self.board, self.tie_reward)
+            self.players[1-self.turn].receive_last_reward(self.board, self.tie_reward)
             self.winner = 2
             return True
         
@@ -75,15 +76,15 @@ class Environment:
     Returns:
     bool game finished
     '''
-    def calc_reward(self, row, column, move_value):
-
+    def calc_reward(self, row, column, move_value):        
+        
         # Directions from current chip to:
         # Up
         # Up right
         # Right
         # Down right
         directions = [(1,0), (1,1), (0,1), (-1,1)]
-        
+
         for direction in directions:
             connected_count = 1             # Number of chips connected to the current one in the current direction
 

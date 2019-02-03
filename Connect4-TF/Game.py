@@ -4,11 +4,11 @@ from RandomAgent import RandomAgent
 from HumanAgent import HumanAgent
 from QAgent import QAgent
 
-games              = 100000
-board_size         = (5,5)
-connections_to_win = 3
-p1                 = QAgent(board_size, isPlayer1 = True)
-p2                 = RandomAgent()
+games               = 10000
+board_size          = (4,4)
+connections_to_win  = 3
+p1                  = QAgent(board_size, isPlayer1 = True)
+p2                  = RandomAgent()
 
 # Game result stats
 stats         = np.zeros(3)
