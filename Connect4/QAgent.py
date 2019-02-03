@@ -21,7 +21,7 @@ class QAgent:
         self.exp_size          = 5000
         self.experience        = np.empty(self.exp_size, dtype=Transition)
         self.exp_index         = 0
-        self.epsilon           = -1
+        self.epsilon           = 0.1
 
         self.start_training    = False                  # Training starts when experience memory reaches batch_size
         self.experience_full   = False                  # Determine if experience memory is full
@@ -47,6 +47,7 @@ class QAgent:
         # Store previous input (state1, action)
         self.prev_input   = [None, None] 
         
+        self.tie_count    = 0 
         
         
     def play(self, state, actions, reward):
@@ -70,8 +71,6 @@ class QAgent:
         # Make best move according to current policy
         else:
             q_vals = self.model.predict(x = [one_hot_board], batch_size=1)[0]
-            
-            # TODO in case of ties choose randomly between tied options
             max_index                      = np.argmax(q_vals[actions])
             sel_action                     = actions[max_index]
             
