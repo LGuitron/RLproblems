@@ -1,5 +1,4 @@
 import numpy as np
-
 class Environment:
 
     '''
@@ -28,7 +27,8 @@ class Environment:
         # 0 for P1 win
         # 1 for P2 win
         # 2 for tie
-        self.winner             = -1                                                  
+        self.winner             = -1
+        self.moves_made         = 0
 
     # Update action space and return its value
     def update_action_space(self):
@@ -70,6 +70,7 @@ class Environment:
             move_value = -1
             
         self.board[row, column] = move_value
+        self.moves_made        += 1
         return self.calc_reward(row, column, move_value)
         
     '''
@@ -116,7 +117,7 @@ class Environment:
                 self.players[1-self.turn].receive_last_reward(self.board, -1*self.win_reward)
                 self.winner = self.turn
                 return True
-            
+        
         # If game did not end go to next turn
         self.next_turn()
         return False
@@ -126,3 +127,24 @@ class Environment:
     def next_turn(self):
         self.update_action_space()
         self.turn = 1 - self.turn
+        
+    # Funtion to print a good looking board
+    def print_board(self):
+        
+        board_string = ""
+        for i in range(self.board.shape[0]):        # Iterate Rows
+            board_string += "["
+            for j in range(self.board.shape[1]):    # Iterate Columns
+                if self.board[i][j] == 1:
+                    char = ' X '
+                elif self.board[i][j] == -1:
+                    char = ' O '
+                else:
+                    char = ' - '
+                board_string += char
+            board_string += "]\n"
+        
+        print(board_string)
+        
+        
+        
