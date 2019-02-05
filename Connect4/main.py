@@ -27,7 +27,7 @@ avg_moves_train = 0
 
 
 #while test_stats[4] < 0.9*test_episodes:
-for i in range(20):
+for i in range(5):
     avg_moves_train, train_stats = sim_games(dqn_agent_1, dqn_agent_2, board_size, connect_to_win, episodes=train_episodes)
     #avg_moves_test, test_stats = sim_games(dqn_agent, dqn_agent_2, board_size, connect_to_win, episodes=test_episodes , doTraining=False)
 
