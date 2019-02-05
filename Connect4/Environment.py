@@ -42,17 +42,14 @@ class Environment:
     '''
     def request_action(self):
         
-        # Check if opponent won the game on its last turn, in that case return done=True
-        #if 
-        
         # If there are no more actions available the game ended in a tie
         if len(self.action_space) == 0:
-            self.players[self.turn].receive_last_reward(self.board, self.tie_reward)
-            self.players[1-self.turn].receive_last_reward(self.board, self.tie_reward)
+            self.players[self.turn].receive_last_reward(self.board, self.turn, self.tie_reward)
+            self.players[1-self.turn].receive_last_reward(self.board, 1-self.turn, self.tie_reward)
             self.winner = 2
             return True
         
-        column = self.players[self.turn].play(self.board, self.action_space, self.wait_reward)
+        column = self.players[self.turn].play(self.board, self.turn, self.action_space, self.wait_reward)
         return self.update_board(column)
         
 
@@ -113,8 +110,8 @@ class Environment:
             
             # Game ended (Give final reward to both players)
             if connected_count >= self.connections_to_win:
-                self.players[self.turn].receive_last_reward(self.board, self.win_reward)
-                self.players[1-self.turn].receive_last_reward(self.board, -1*self.win_reward)
+                self.players[self.turn].receive_last_reward(self.board, self.turn,  self.win_reward)
+                self.players[1-self.turn].receive_last_reward(self.board, 1-self.turn ,-1*self.win_reward)
                 self.winner = self.turn
                 return True
         

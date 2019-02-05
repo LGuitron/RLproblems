@@ -26,7 +26,6 @@ class ExperiencedModel:
             self.experience[self.exp_index] = deepcopy(transition)
             self.exp_index = (self.exp_index + 1) % self.exp_size
     
-    
     # Save instance values to text files
     def save_data(self, save_path):
         with open(save_path + ".pkl", "wb") as f:
@@ -44,6 +43,5 @@ class ExperiencedModel:
 
         model = load_model(load_path + ".h5")
         experiencedModel = ExperiencedModel(model, model_name, exp_size, experience, exp_index)
-
         return experiencedModel
         
