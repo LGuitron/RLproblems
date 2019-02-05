@@ -130,7 +130,7 @@ class DQNAgent:
             self.update_count += 1
     
     def save(self):
-        self.experiencedModel.save_data("models/"+ self.experiencedModel.model_name + "_" + str(self.board_size[0]) + "_" + str(self.board_size[1]))
+        self.experiencedModel.save_data("models/dqn_"+ self.experiencedModel.model_name + "_" + str(self.board_size[0]) + "_" + str(self.board_size[1]) + "_p" + str(self.player))
     
     # Function to display this agent's training history
     def print_train_history(self):
