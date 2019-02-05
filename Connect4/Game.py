@@ -5,7 +5,7 @@ from Environment import Environment
 '''
 Games for AI (board not displayed)
 '''
-def sim_games(p1, p2, board_size, connections_to_win, episodes=1000, doTraining = True , stats_display_freq = 100):
+def sim_games(p1, p2, board_size, connections_to_win, episodes=1000, doTraining = True , stats_display_freq = 1000):
     
     # Set epsilon_greedy to players who have it
     if hasattr(p1, 'is_training'):

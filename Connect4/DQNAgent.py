@@ -13,7 +13,7 @@ Deep Q Network Agent that receives current board as input
 '''
 class DQNAgent:
     
-    def __init__(self, board_size, load_path = None):
+    def __init__(self, board_size, load_path = None, compiled_model = None, model_name=""):
 
         self.board_size = board_size
         
@@ -31,8 +31,13 @@ class DQNAgent:
         
         # Create new model if path is not specified or if the load_path entered does not exist
         if load_path is None or not (Path(load_path + ".h5").is_file() and Path(load_path + ".pkl").is_file()):
-            comp_model, model_name = compile_model1(self.board_size)
-            self.experiencedModel  = ExperiencedModel(comp_model, model_name, exp_size = 50000)
+            
+            if compiled_model is not None:
+                #comp_model, model_name = compile_model1(self.board_size)
+                self.experiencedModel  = ExperiencedModel(compiled_model, model_name, exp_size = 50000)
+            else:
+                print("ERROR, unspecified model for DQN Agent.")
+                exit()
         
         # Load experiencedModel from load_path
         else:
@@ -83,19 +88,8 @@ class DQNAgent:
         # 3. Agent experience has at least the size of the batch
         if self.step_count % self.update_frequency == 0 and self.is_training and len(self.experiencedModel.experience) >= self.batch_size:
 
-            transitions  = random.sample(self.experiencedModel.experience, k=self.batch_size)
-            state1       = np.zeros((self.batch_size,self.board_size[0], self.board_size[1], 2))
-            action       = np.zeros(self.batch_size)
-            reward       = np.zeros(self.batch_size)
-            state2       = np.zeros((self.batch_size,self.board_size[0], self.board_size[1], 2))
-            action2      = []                                                                       # Actions available from state2
-
-            for i , transition in enumerate(transitions):
-                state1[i] = transition.state1
-                action[i] = transition.action
-                reward[i] = transition.reward
-                state2[i] = transition.state2
-                action2.append(transition.action2)
+            # Get samples from experience memory
+            state1, action, reward, state2, action2 = self.experiencedModel.get_samples(self.batch_size, self.board_size)
 
             # Forward pass to generate Q values with state1
             targetQ = self.experiencedModel.model.predict(x = [state1], batch_size = self.batch_size)

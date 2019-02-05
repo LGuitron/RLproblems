@@ -1,4 +1,6 @@
 import pickle
+import random
+import numpy as np
 from copy import deepcopy
 from keras.models import load_model
 '''
@@ -25,6 +27,25 @@ class ExperiencedModel:
         else:
             self.experience[self.exp_index] = deepcopy(transition)
             self.exp_index = (self.exp_index + 1) % self.exp_size
+    
+    
+    # Get samples from experience list
+    def get_samples(self, n, board_size):
+        transitions  = random.sample(self.experience, k=n)
+        state1       = np.zeros((n,board_size[0], board_size[1], 2))
+        action       = np.zeros(n)
+        reward       = np.zeros(n)
+        state2       = np.zeros((n,board_size[0], board_size[1], 2))
+        action2      = []                                                                       # Actions available from state2
+
+        for i , transition in enumerate(transitions):
+            state1[i] = transition.state1
+            action[i] = transition.action
+            reward[i] = transition.reward
+            state2[i] = transition.state2
+            action2.append(transition.action2)
+    
+        return state1, action, reward, state2, action2
     
     # Save instance values to text files
     def save_data(self, save_path):
