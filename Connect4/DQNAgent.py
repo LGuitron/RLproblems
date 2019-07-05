@@ -23,7 +23,7 @@ class DQNAgent:
         self.epsilon            = 0.1
         
         # Update parameters
-        self.update_frequency   = 16        # Steps that the agent has to perform before updating its weights
+        self.update_frequency   = 256       # Steps that the agent has to perform before updating its weights
         self.step_count         = 0         # Steps made since last update
 
         self.epsilon_greedy    = True       # Agent uses epsilon greedy strategy when this is True (otherwise uses its model for all moves)
@@ -42,7 +42,7 @@ class DQNAgent:
         # Load experiencedModel from load_path
         else:
             self.experiencedModel = ExperiencedModel.load_data(load_path)
-            print(self.experiencedModel.exp_index)
+
         # Store previous input (state1, action) for P1 and P2 in the current game
         self.prev_state  = [None, None]
         self.prev_action = [None, None] 
