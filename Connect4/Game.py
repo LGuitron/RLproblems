@@ -1,18 +1,26 @@
 import time
 import numpy as np
 from Environment import Environment
+from copy import deepcopy
 
 '''
 Games for AI (board not displayed)
 '''
-def sim_games(p1, p2, board_size, connections_to_win, episodes=1000, doTraining = True , stats_display_freq = 1000):
+def sim_games(p1, p2, board_size, connections_to_win, episodes=1000, doTraining = True, epsilon_greedy=True, stats_display_freq = 1000):
     
-    # Set epsilon_greedy to players who have it
+    # Set training mode to players who have it
     if hasattr(p1, 'is_training'):
         p1.is_training = doTraining
     
     if hasattr(p2, 'is_training'):
         p2.is_training = doTraining
+
+    # Set epsilon_greedy to players who have it
+    if hasattr(p1, 'epsilon_greedy'):
+        p1.epsilon_greedy = epsilon_greedy
+    
+    if hasattr(p2, 'epsilon_greedy'):
+        p2.epsilon_greedy = epsilon_greedy
 
     # [P1 wins, P2 wins, Ties, Agent1 Wins, Agent2 Wins]
     stats      = np.zeros(5)            
@@ -49,19 +57,31 @@ def sim_games(p1, p2, board_size, connections_to_win, episodes=1000, doTraining 
             prev_stats   = np.copy(stats)
             current_time = time.time()
         
+        # Increase episode count if this was a training game
+        if doTraining:
+            p1.experiencedModel.games_trained += 1
+
     return moves_made/episodes, stats
+    
 
 '''
 Games to be rendered move by move
 '''
 def rendered_games(p1, p2, board_size, connections_to_win):
     
-    # Remove randomness from the players
+    # Stop training mode from the players
     if hasattr(p1, 'is_training'):
         p1.is_training = False
     
     if hasattr(p2, 'is_training'):
         p2.is_training = False
+    
+    # Remove randomness from players
+    if hasattr(p1, 'epsilon_greedy'):
+        p1.epsilon_greedy = False
+    
+    if hasattr(p2, 'epsilon_greedy'):
+        p2.epsilon_greedy = False
     
     print("----------")
     print("Connect ", connections_to_win)

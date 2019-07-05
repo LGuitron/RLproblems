@@ -25,9 +25,9 @@ class DQNAgent:
         # Update parameters
         self.update_frequency   = 16        # Steps that the agent has to perform before updating its weights
         self.step_count         = 0         # Steps made since last update
-        
-        # Determine if player uses epsilon_greedy startegy and makes updates on its model
-        self.is_training       = True   
+
+        self.epsilon_greedy    = True       # Agent uses epsilon greedy strategy when this is True (otherwise uses its model for all moves)
+        self.is_training       = True       # Agent updates its model when this is True
         
         # Create new model if path is not specified or if the load_path entered does not exist
         if load_path is None or not (Path(load_path + ".h5").is_file() and Path(load_path + ".pkl").is_file()):
@@ -52,7 +52,7 @@ class DQNAgent:
         state_one_hot = transform_board(self.board_size, state, turn)
 
         # Make random move
-        if self.is_training and random.random() < self.epsilon:
+        if self.epsilon_greedy and random.random() < self.epsilon:
             sel_action = random.choice(actions)
         
         # Make best move according to current model
@@ -82,7 +82,7 @@ class DQNAgent:
         
     # Function for fitting model
     def fit_model(self):
-        # 3 cinditions to fit:
+        # 3 conditions to fit:
         # 1. Update frequency step reached
         # 2. Training mode active
         # 3. Agent experience has at least the size of the batch

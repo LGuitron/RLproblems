@@ -10,14 +10,15 @@ Class for storing a Keras Model together with its Experience Memory
 '''
 class ExperiencedModel:
 
-    def __init__(self, model, model_name, exp_size, experience = [], exp_index = 0):
+    def __init__(self, model, model_name, exp_size, experience = [], exp_index = 0, rating=0, games_trained=0):
     
-        self.model        = model
-        self.model_name   = model_name
-        self.exp_size     = exp_size
-        self.exp_index    = exp_index
-        self.experience   = experience
-
+        self.rating        = rating
+        self.model         = model
+        self.model_name    = model_name
+        self.exp_size      = exp_size
+        self.exp_index     = exp_index
+        self.experience    = experience
+        self.games_trained = games_trained
     
     # Add a transition into experience memory
     def add_experience(self, transition):
@@ -50,7 +51,7 @@ class ExperiencedModel:
     # Save instance values to text files
     def save_data(self, save_path):
         with open(save_path + ".pkl", "wb") as f:
-            pickle.dump([self.exp_size, self.exp_index, self.experience, self.model_name], f)
+            pickle.dump([self.exp_size, self.exp_index, self.experience, self.model_name, self.rating, self.games_trained], f)
         self.model.save(save_path + ".h5")
         
 
@@ -58,11 +59,11 @@ class ExperiencedModel:
     def load_data(load_path):
         try:
             with open(load_path + ".pkl", "rb") as f:
-                exp_size, exp_index, experience, model_name = pickle.load(f)
+                exp_size, exp_index, experience, model_name, rating, games_trained = pickle.load(f)
         except:
-            exp_size, exp_index, experience, model_name = 0, 0, [], ""
+            exp_size, exp_index, experience, model_name, rating, games_trained = 0, 0, [], "", 0, 0
 
         model = load_model(load_path + ".h5")
-        experiencedModel = ExperiencedModel(model, model_name, exp_size, experience, exp_index)
+        experiencedModel = ExperiencedModel(model, model_name, exp_size, experience, exp_index, rating, games_trained)
         return experiencedModel
         
