@@ -34,7 +34,7 @@ class DQNAgent:
             
             if compiled_model is not None:
                 #comp_model, model_name = compile_model1(self.board_size)
-                self.experiencedModel  = ExperiencedModel(compiled_model, model_name, exp_size = 50000)
+                self.experiencedModel  = ExperiencedModel(compiled_model, model_name, exp_size = 1000000)
             else:
                 print("ERROR, unspecified model for DQN Agent.")
                 exit()
@@ -42,7 +42,7 @@ class DQNAgent:
         # Load experiencedModel from load_path
         else:
             self.experiencedModel = ExperiencedModel.load_data(load_path)
-
+            print(self.experiencedModel.exp_index)
         # Store previous input (state1, action) for P1 and P2 in the current game
         self.prev_state  = [None, None]
         self.prev_action = [None, None] 

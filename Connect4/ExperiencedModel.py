@@ -60,6 +60,7 @@ class ExperiencedModel:
         try:
             with open(load_path + ".pkl", "rb") as f:
                 exp_size, exp_index, experience, model_name, rating, games_trained = pickle.load(f)
+
         except:
             exp_size, exp_index, experience, model_name, rating, games_trained = 0, 0, [], "", 0, 0
 

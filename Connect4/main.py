@@ -22,7 +22,7 @@ human_agent      = HumanAgent()
 
 train_episodes    = 1000
 test_episodes     = 1000
-test_train_epochs = 3
+test_train_epochs = 1
 train_stats       = np.zeros(5)
 test_stats        = np.zeros(5)
 avg_moves_test    = 0
