@@ -6,7 +6,7 @@ from copy import deepcopy
 '''
 Games for AI (board not displayed)
 '''
-def sim_games(p1, p2, board_size, connections_to_win, episodes=1000, doTraining = True, epsilon_greedy=True, stats_display_freq = 1000):
+def sim_games(p1, p2, board_size, connections_to_win, episodes=1000, doTraining = True, epsilon_greedy=True, display_results = True):
     
     # Set training mode to players who have it
     if hasattr(p1, 'is_training'):
@@ -24,7 +24,6 @@ def sim_games(p1, p2, board_size, connections_to_win, episodes=1000, doTraining 
 
     # [P1 wins, P2 wins, Ties, Agent1 Wins, Agent2 Wins]
     stats      = np.zeros(5)            
-    prev_stats = np.zeros(5)
     moves_made = 0
     
     current_time = time.time()
@@ -36,7 +35,7 @@ def sim_games(p1, p2, board_size, connections_to_win, episodes=1000, doTraining 
         else:
             connect4         = Environment(p2,p1, board_size, connections_to_win)
         
-        done             = False
+        done                 = False
         while not done:
             done = connect4.request_action()
         stats[connect4.winner] += 1
@@ -47,20 +46,13 @@ def sim_games(p1, p2, board_size, connections_to_win, episodes=1000, doTraining 
             stats[3 + i%2] += 1
         elif connect4.winner == 1:
             stats[4 - i%2] += 1
-            
-        
-        
-        if (i+1)%stats_display_freq == 0:
-            elapsed_time = time.time()-current_time            
-            print("P1: " , int(stats[0] - prev_stats[0]), " P2: " , int(stats[1] - prev_stats[1]), " Ties: " , int(stats[2] - prev_stats[2]), " A1: ", int(stats[3] - prev_stats[3]), " A2: ", int(stats[4] - prev_stats[4]) , " Time: ", '{0:.3f}'.format(elapsed_time) , "   Avg. Moves: " , '{0:.3f}'.format(moves_made/(i+1)))
-            
-            prev_stats   = np.copy(stats)
-            current_time = time.time()
         
         # Increase episode count if this was a training game
         if doTraining:
             p1.experiencedModel.games_trained += 1
 
+    if display_results:           
+        print("P1: " , int(stats[0]), " P2: " , int(stats[1]), " Ties: " , int(stats[2]), " A1: ", int(stats[3]), " A2: ", int(stats[4]) , "   Avg. Moves: " , '{0:.3f}'.format(moves_made/(i+1)))
     return moves_made/episodes, stats
     
 
