@@ -49,7 +49,11 @@ def sim_games(p1, p2, board_size, connections_to_win, episodes=1000, doTraining 
         
         # Increase episode count if this was a training game
         if doTraining:
-            p1.experiencedModel.games_trained += 1
+            if hasattr(p1, 'experiencedModel'):
+                p1.experiencedModel.games_trained += 1
+                
+            if hasattr(p2, 'experiencedModel'):
+                p2.experiencedModel.games_trained += 1
 
     if display_results:           
         print("P1: " , int(stats[0]), " P2: " , int(stats[1]), " Ties: " , int(stats[2]), " A1: ", int(stats[3]), " A2: ", int(stats[4]) , "   Avg. Moves: " , '{0:.3f}'.format(moves_made/(i+1)))

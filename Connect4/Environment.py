@@ -14,9 +14,9 @@ class Environment:
         self.players            = (p1, p2)
         
         # Environment parameters
-        self.win_reward         = 20
+        self.win_reward         = 1
         self.tie_reward         = 0
-        self.wait_reward        = -1
+        self.wait_reward        = 0
         
         # True for P1 turn
         self.turn               = 0                                                       # 0 for P1, 1 for P2                  
