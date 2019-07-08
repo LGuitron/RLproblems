@@ -1,6 +1,7 @@
 import pickle
 import random
 import numpy as np
+import numpy as np
 from copy import deepcopy
 from keras.models import load_model
 '''
@@ -10,7 +11,7 @@ Class for storing a Keras Model together with its Experience Memory
 '''
 class ExperiencedModel:
 
-    def __init__(self, model, model_name, exp_size, experience = [], exp_index = 0, rating=0, games_trained=0):
+    def __init__(self, model, model_name, exp_size, experience = [], exp_index = 0, rating=0, games_trained=0, episode_list=[], rating_history=[], last_loss=0, loss_history=[], game_length_history=[], last_game_results=np.zeros((100, 3)), last_game_index=0):
     
         self.rating        = rating
         self.model         = model
@@ -20,6 +21,21 @@ class ExperiencedModel:
         self.experience    = experience
         self.games_trained = games_trained
     
+        # Store rating progression info for plotting
+        self.episode_list   = episode_list
+        self.rating_history = rating_history
+    
+        # Store lose progression for plotting
+        self.last_loss      = last_loss
+        self.loss_history   = loss_history
+        
+        # Store average game length for later plotting
+        self.game_length_history = game_length_history
+        
+        # Store game results from last 100 games
+        self.last_game_results  = last_game_results
+        self.last_game_index    = last_game_index       # Ranges from 0 to 99
+        
     # Add a transition into experience memory
     def add_experience(self, transition):
         
@@ -51,7 +67,7 @@ class ExperiencedModel:
     # Save instance values to text files
     def save_data(self, save_path):
         with open(save_path + ".pkl", "wb") as f:
-            pickle.dump([self.exp_size, self.exp_index, self.experience, self.model_name, self.rating, self.games_trained], f)
+            pickle.dump([self.exp_size, self.exp_index, self.experience, self.model_name, self.rating, self.games_trained, self.episode_list, self.rating_history, self.last_loss, self.loss_history, self.game_length_history, self.last_game_results, self.last_game_index], f)
         self.model.save(save_path + ".h5")
         
 
@@ -59,12 +75,12 @@ class ExperiencedModel:
     def load_data(load_path):
         try:
             with open(load_path + ".pkl", "rb") as f:
-                exp_size, exp_index, experience, model_name, rating, games_trained = pickle.load(f)
+                exp_size, exp_index, experience, model_name, rating, games_trained, episode_list, rating_history, last_loss, loss_history, game_length_history, last_game_results, last_game_index = pickle.load(f)
 
         except:
-            exp_size, exp_index, experience, model_name, rating, games_trained = 0, 0, [], "", 0, 0
+            exp_size, exp_index, experience, model_name, rating, games_trained, episode_list, rating_history, last_loss, loss_history, game_length_history, last_game_results, last_game_index = 0, 0, [], "", 0, 0, [], [], 0, [], [], np.zeros((100, 3)), 0
 
         model = load_model(load_path + ".h5")
-        experiencedModel = ExperiencedModel(model, model_name, exp_size, experience, exp_index, rating, games_trained)
+        experiencedModel = ExperiencedModel(model, model_name, exp_size, experience, exp_index, rating, games_trained, episode_list, rating_history, last_loss, loss_history, game_length_history, last_game_results, last_game_index)
         return experiencedModel
         

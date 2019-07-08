@@ -18,12 +18,12 @@ class DQNAgent:
         self.board_size = board_size
         
         # Q Learning parameters
-        self.batch_size         = 16
+        self.batch_size         = 256
         self.discount           = 0.9
         self.epsilon            = 0.1
         
         # Update parameters
-        self.update_frequency   = 256       # Steps that the agent has to perform before updating its weights
+        self.update_frequency   = 32        # Steps that the agent has to perform before updating its weights
         self.step_count         = 0         # Steps made since last update
 
         self.epsilon_greedy    = True       # Agent uses epsilon greedy strategy when this is True (otherwise uses its model for all moves)
@@ -105,8 +105,11 @@ class DQNAgent:
 
                 future_reward  = np.max(futureQ[i][action2[i]])
                 targetQ[i, int(action[i])] += self.discount*future_reward
+
+            history = self.experiencedModel.model.fit(x = [state1], y = [targetQ], batch_size = self.batch_size, verbose=None)
             
-            self.experiencedModel.model.fit(x = [state1], y = [targetQ], batch_size = self.batch_size, verbose=None)
+            # Add loss information to list for later plotting
+            self.experiencedModel.last_loss = history.history['loss'][0]
         
         # Increase step count
         self.step_count += 1

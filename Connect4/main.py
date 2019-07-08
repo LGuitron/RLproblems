@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from KerasModels import *
 from DQNAgent import DQNAgent
 from HumanAgent import HumanAgent
@@ -16,13 +17,12 @@ model2, model2_name            = compile_model2(board_size)
 model_simple, model_simle_name = compile_model_simple(board_size)
 
 dqn_agent_1      = DQNAgent(board_size, "models/dqn_model1_6_7", model1, model1_name)
-#dqn_agent_2      = DQNAgent(board_size, "models/dqn_model2_6_7", model2, model2_name)
 rand_agent       = RandomAgent()
 human_agent      = HumanAgent()
 
 train_episodes          = 1000
 test_episodes           = 2
-test_train_epochs       = 100
+test_train_epochs       = 5
 display_stats_frequency = 1000              # Display stats after this amount of games
 train_stats             = np.zeros(5)
 test_stats              = np.zeros(5)
@@ -57,9 +57,43 @@ for i in range(test_train_epochs):
         
         print("Player Strength: ", int(new_rating))
         print("Training Games: ", dqn_agent_1.experiencedModel.games_trained)
+        print("Training Loss: ", '{0:.3f}'.format(dqn_agent_1.experiencedModel.last_loss) )
         elapsed_time = time.time() - current_time
         print("Elapsed Time: ", '{0:.3f}'.format(elapsed_time) )
         current_time = time.time()
         
+        # Store current information for plots
+        dqn_agent_1.experiencedModel.episode_list.append(dqn_agent_1.experiencedModel.games_trained)
+        dqn_agent_1.experiencedModel.rating_history.append(new_rating)
+        dqn_agent_1.experiencedModel.loss_history.append(dqn_agent_1.experiencedModel.last_loss)
+        dqn_agent_1.experiencedModel.game_length_history.append(avg_moves_test)
+        dqn_agent_1.experiencedModel.last_game_results[dqn_agent_1.experiencedModel.last_game_index] = test_stats[0:3]
+        dqn_agent_1.experiencedModel.last_game_index = (dqn_agent_1.experiencedModel.last_game_index + 1) % 100
+
 dqn_agent_1.save()
+
+episodes            = dqn_agent_1.experiencedModel.episode_list
+rating              = dqn_agent_1.experiencedModel.rating_history
+loss                = dqn_agent_1.experiencedModel.loss_history
+game_length         = dqn_agent_1.experiencedModel.game_length_history
+game_results        = np.sum(dqn_agent_1.experiencedModel.last_game_results, axis=0)
+game_results_labels = 'P1', 'P2', 'T'
+print(game_results)
+
+fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
+
+ax1.set_title('Agent Strength')
+ax2.set_title('Training Loss')
+ax3.set_title('Game Length')
+ax4.set_title('Game Results')
+
+ax1.plot(episodes, rating)
+ax2.plot(episodes, loss)
+ax3.plot(episodes, game_length)
+ax4.pie(game_results, explode=None, labels=game_results_labels)
+
+plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
+plt.show()
+
 #rendered_games(dqn_agent_1, human_agent, board_size, connect_to_win)
+
