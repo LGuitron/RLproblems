@@ -49,23 +49,39 @@ class DQNAgent:
     def play(self, state, turn, actions, reward):
         
         state_one_hot = transform_board(self.board_size, state, turn)
-
+        selected_action = False
+    
         # Follow exploration strategy
         if self.is_exploring:
-            
+
             # E-Greedy Exploration
-            if self.experiencedModel.agent_type == AgentType.EGreedy and random.random() < self.experiencedModel.exploration:
-                sel_action = random.choice(actions)
-        
-            # Make best move according to current model
-            else:
-                q_vals      = self.experiencedModel.model.predict(x = [state_one_hot], batch_size=1)[0]
-                max_index   = np.argmax(q_vals[actions])
-                sel_action  = actions[max_index]
+            if self.experiencedModel.agent_type == AgentType.EGreedy:
+                if random.random() < self.experiencedModel.exploration:
+                    sel_action = random.choice(actions)
+                    selected_action = True
+                    
+            # Softmax Exploration
+            elif self.experiencedModel.agent_type == AgentType.Softmax:
+                q_vals = self.experiencedModel.model.predict(x = [state_one_hot], batch_size=1)[0]
+                logits = q_vals[actions]/self.experiencedModel.exploration
+                e_x     = np.exp(logits - np.max(logits))
+                softmax = e_x / e_x.sum()
+                
+                # Select action with softmax
+                random_val       = random.random()
+                cummulative_prob = 0
+                
+                for i in range(len(softmax)):
+                    cummulative_prob += softmax[i]
+                    if random_val < cummulative_prob:
+                        action_index = i
+                        break
+
+                sel_action = actions[action_index]
+                selected_action = True
             
-            
-        # Make best move according to current model
-        else:
+        # Make best move according to current model if action has not been selected yet
+        if not selected_action:
             q_vals      = self.experiencedModel.model.predict(x = [state_one_hot], batch_size=1)[0]
             max_index   = np.argmax(q_vals[actions])
             sel_action  = actions[max_index]
