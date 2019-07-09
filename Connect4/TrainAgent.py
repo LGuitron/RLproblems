@@ -1,5 +1,5 @@
 from Game import sim_games, rendered_games
-from CalculateRating import *
+from AgentType import AgentType
 from DQNAgent import DQNAgent
 from copy import deepcopy
 import numpy as np
@@ -22,12 +22,16 @@ def train_DQN_agent(agent, train_episodes, test_episodes, train_test_epochs, boa
         # Display results only after certain amount of games
         if (agent.experiencedModel.games_trained) % display_stats_frequency == 0:
             print("===========================================================================")
-            avg_moves_test, test_stats = sim_games(agent, agent, board_size, connect_to_win, episodes=test_episodes, doTraining=False, epsilon_greedy=False, display_results = True)
+            avg_moves_test, test_stats = sim_games(agent, agent, board_size, connect_to_win, episodes=test_episodes, doTraining=False, is_exploring=False, display_results = True)
         else:
-            avg_moves_test, test_stats = sim_games(agent, agent, board_size, connect_to_win, episodes=test_episodes, doTraining=False, epsilon_greedy=False, display_results = False)
+            avg_moves_test, test_stats = sim_games(agent, agent, board_size, connect_to_win, episodes=test_episodes, doTraining=False, is_exploring=False, display_results = False)
 
         if (agent.experiencedModel.games_trained) % display_stats_frequency == 0:
-
+            
+            if agent.experiencedModel.agent_type == AgentType.EGreedy:
+                print("Epsilon: ", '{0:.6f}'.format(agent.experiencedModel.exploration))
+            elif agent.experiencedModel.agent_type == AgentType.Softmax:
+                print("Temperature: ", '{0:.6f}'.format(agent.experiencedModel.exploration))
             print("Training Games: ", agent.experiencedModel.games_trained)
             print("Training Loss: ", '{0:.6f}'.format(agent.experiencedModel.last_loss) )
             elapsed_time = time.time() - current_time

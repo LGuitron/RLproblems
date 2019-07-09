@@ -3,25 +3,35 @@ from TrainAgent import train_DQN_agent
 from PlotResults import plot_results
 from RandomAgent import RandomAgent
 from HumanAgent import HumanAgent
+from AgentType import AgentType
 from DQNAgent import DQNAgent
 from KerasModels import *
 
 board_size      = (6,7)
 connect_to_win  = 4
 
-model2, model2_name     = compile_model2(board_size)
-dqn_agent               = DQNAgent(board_size, "models/dqn_model2_6_7", model2, model2_name)
+# Keras model to be used
+model, model_name       = compile_model(board_size)
+
+#E-Greedy Agent
+epsilon_vals            = [1.0, 1.0, 0.5, 0.2, 0.1, 0.05]
+epsilon_decay           = [50000, 100000, 500000, 1000000, 1500000]
+egreedy_dqn_agent       = DQNAgent(board_size, "models/dqn_model_6_7", model, model_name, AgentType.EGreedy, epsilon_vals, epsilon_decay)
+
+# Random Agent
 rand_agent              = RandomAgent()
+
+# Human Agent
 human_agent             = HumanAgent()
 
 train_episodes          = 1000
 test_episodes           = 1
-test_train_epochs       = 3
+test_train_epochs       = 2000
 display_stats_frequency = 1000              # Display stats after this amount of games
 
 # Train RL agent and plot it
-train_DQN_agent(dqn_agent, train_episodes, test_episodes, test_train_epochs, board_size, connect_to_win, display_stats_frequency)
-plot_results(dqn_agent)
+train_DQN_agent(egreedy_dqn_agent, train_episodes, test_episodes, test_train_epochs, board_size, connect_to_win, display_stats_frequency)
+plot_results(egreedy_dqn_agent)
 
 # Train against random agent
 #for i in range(5):
@@ -31,6 +41,6 @@ plot_results(dqn_agent)
 # rendered_games(dqn_agent, human_agent, board_size, connect_to_win)
 
 # Test Match between agents
-#sim_games(dqn_agent, prev_dqn_agent, board_size, connect_to_win, episodes=1000, doTraining=False, epsilon_greedy=True, display_results = True)
-#sim_games(dqn_agent, prev_dqn_agent, board_size, connect_to_win, episodes=2, doTraining=False, epsilon_greedy=False, display_results = True)
-#sim_games(dqn_agent, rand_agent, board_size, connect_to_win, episodes=1000, doTraining=False, epsilon_greedy=False, display_results = True)
+#sim_games(dqn_agent, prev_dqn_agent, board_size, connect_to_win, episodes=1000, doTraining=False, is_exploring=True, display_results = True)
+#sim_games(dqn_agent, prev_dqn_agent, board_size, connect_to_win, episodes=2, doTraining=False, is_exploring=False, display_results = True)
+#sim_games(egreedy_dqn_agent, rand_agent, board_size, connect_to_win, episodes=1000, doTraining=False, is_exploring=False, display_results = True)

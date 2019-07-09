@@ -1,8 +1,9 @@
 import random
 import numpy as np
 from pathlib import Path
+from AgentType import AgentType
 from Transition import Transition
-from KerasModels import compile_model1
+from KerasModels import *
 from TransformBoard import transform_board
 from ExperiencedModel import ExperiencedModel
 
@@ -13,28 +14,26 @@ Deep Q Network Agent that receives current board as input
 '''
 class DQNAgent:
     
-    def __init__(self, board_size, load_path = None, compiled_model = None, model_name=""):
+    def __init__(self, board_size, load_path = None, compiled_model = None, model_name="", agent_type=AgentType.EGreedy, exploration_params=[1.0, 1.0, 0.1], exploration_decay=[100000, 1000000]):
 
         self.board_size = board_size
-        
+
         # Q Learning parameters
         self.batch_size         = 256
         self.discount           = 0.9
-        self.epsilon            = 0.1
         
         # Update parameters
-        self.update_frequency   = 32        # Steps that the agent has to perform before updating its weights
-        self.step_count         = 0         # Steps made since last update
+        self.update_frequency   = 256      # Steps that the agent has to perform before updating its weights
+        self.step_count         = 0        # Steps made since last update
 
-        self.epsilon_greedy    = True       # Agent uses epsilon greedy strategy when this is True (otherwise uses its model for all moves)
-        self.is_training       = True       # Agent updates its model when this is True
+        self.is_exploring      = True      # Agent uses exploration strategy when True (Softmax or E-Greedy)
+        self.is_training       = True      # Agent updates its model when this is True
         
         # Create new model if path is not specified or if the load_path entered does not exist
         if load_path is None or not (Path(load_path + ".h5").is_file() and Path(load_path + ".pkl").is_file()):
             
             if compiled_model is not None:
-                #comp_model, model_name = compile_model1(self.board_size)
-                self.experiencedModel  = ExperiencedModel(compiled_model, model_name, exp_size = 1000000)
+                self.experiencedModel  = ExperiencedModel(compiled_model, model_name, agent_type, exploration_params, exploration_decay, exploration_params[0], exp_size = 1000000)
             else:
                 print("ERROR, unspecified model for DQN Agent.")
                 exit()
@@ -51,10 +50,20 @@ class DQNAgent:
         
         state_one_hot = transform_board(self.board_size, state, turn)
 
-        # Make random move
-        if self.epsilon_greedy and random.random() < self.epsilon:
-            sel_action = random.choice(actions)
+        # Follow exploration strategy
+        if self.is_exploring:
+            
+            # E-Greedy Exploration
+            if self.experiencedModel.agent_type == AgentType.EGreedy and random.random() < self.experiencedModel.exploration:
+                sel_action = random.choice(actions)
         
+            # Make best move according to current model
+            else:
+                q_vals      = self.experiencedModel.model.predict(x = [state_one_hot], batch_size=1)[0]
+                max_index   = np.argmax(q_vals[actions])
+                sel_action  = actions[max_index]
+            
+            
         # Make best move according to current model
         else:
             q_vals      = self.experiencedModel.model.predict(x = [state_one_hot], batch_size=1)[0]

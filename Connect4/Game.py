@@ -6,7 +6,7 @@ from copy import deepcopy
 '''
 Games for AI (board not displayed)
 '''
-def sim_games(p1, p2, board_size, connections_to_win, episodes=1000, doTraining = True, epsilon_greedy=True, display_results = True):
+def sim_games(p1, p2, board_size, connections_to_win, episodes=1000, doTraining = True, is_exploring=True, display_results = True):
 
     # Set training mode to players who have it
     if hasattr(p1, 'is_training'):
@@ -16,11 +16,11 @@ def sim_games(p1, p2, board_size, connections_to_win, episodes=1000, doTraining 
         p2.is_training = doTraining
 
     # Set epsilon_greedy to players who have it
-    if hasattr(p1, 'epsilon_greedy'):
-        p1.epsilon_greedy = epsilon_greedy
+    if hasattr(p1, 'is_exploring'):
+        p1.is_exploring = is_exploring
 
-    if hasattr(p2, 'epsilon_greedy'):
-        p2.epsilon_greedy = epsilon_greedy
+    if hasattr(p2, 'is_exploring'):
+        p2.is_exploring = is_exploring
 
     # [P1 wins, P2 wins, Ties, Agent1 Wins, Agent2 Wins]
     stats      = np.zeros(5)
@@ -48,13 +48,16 @@ def sim_games(p1, p2, board_size, connections_to_win, episodes=1000, doTraining 
             stats[4 - i%2] += 1
 
         # Increase episode count if this was a training game
+        # Also decrease the exploration parameter as required
         if doTraining:
             if hasattr(p1, 'experiencedModel'):
                 p1.experiencedModel.games_trained += 0.5
+                p1.experiencedModel.decay_exploration()
 
             if hasattr(p2, 'experiencedModel'):
                 p2.experiencedModel.games_trained += 0.5
-
+                p1.experiencedModel.decay_exploration()
+                
     if display_results:
         print("P1: " , int(stats[0]), " P2: " , int(stats[1]), " Ties: " , int(stats[2]), " A1: ", int(stats[3]), " A2: ", int(stats[4]) , "   Avg. Moves: " , '{0:.3f}'.format(moves_made/(i+1)))
     return moves_made/episodes, stats
@@ -73,11 +76,11 @@ def rendered_games(p1, p2, board_size, connections_to_win):
         p2.is_training = False
 
     # Remove randomness from players
-    if hasattr(p1, 'epsilon_greedy'):
-        p1.epsilon_greedy = False
+    if hasattr(p1, 'is_exploring'):
+        p1.is_exploring = False
 
-    if hasattr(p2, 'epsilon_greedy'):
-        p2.epsilon_greedy = False
+    if hasattr(p2, 'is_exploring'):
+        p2.is_exploring = False
 
     print("----------")
     print("Connect ", connections_to_win)
