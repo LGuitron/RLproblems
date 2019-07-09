@@ -7,7 +7,7 @@ import time
 
 # Function for training agent against itself
 def train_DQN_agent(agent, train_episodes, test_episodes, train_test_epochs, board_size = (6, 7), connect_to_win = 4, display_stats_frequency = 1000):
-    
+
     train_stats             = np.zeros(5)
     test_stats              = np.zeros(5)
     avg_moves_test          = 0
@@ -16,37 +16,26 @@ def train_DQN_agent(agent, train_episodes, test_episodes, train_test_epochs, boa
     # Agent plays against itself and recalculates its rating frequently
     current_time = time.time()
     for i in range(train_test_epochs):
-        
-        # Store old agent network for measuring rating increase
-        old_agent = DQNAgent(board_size, None, deepcopy(agent.experiencedModel.model), deepcopy(agent.experiencedModel.model_name))
-        agent.experiencedModel.rating =  agent.experiencedModel.rating
-        
+
         avg_moves_train, train_stats = sim_games(agent, agent, board_size, connect_to_win, episodes=train_episodes, display_results = False)
-        
+
         # Display results only after certain amount of games
         if (agent.experiencedModel.games_trained) % display_stats_frequency == 0:
             print("===========================================================================")
-            avg_moves_test, test_stats = sim_games(agent, old_agent, board_size, connect_to_win, episodes=test_episodes, doTraining=False, epsilon_greedy=False, display_results = True)
+            avg_moves_test, test_stats = sim_games(agent, agent, board_size, connect_to_win, episodes=test_episodes, doTraining=False, epsilon_greedy=False, display_results = True)
         else:
-            avg_moves_test, test_stats = sim_games(agent, old_agent, board_size, connect_to_win, episodes=test_episodes, doTraining=False, epsilon_greedy=False, display_results = False)
-        
-        old_rating      = agent.experiencedModel.rating
-        new_agent_score = (test_stats[3] + 0.5*test_stats[2])/test_episodes
-        new_rating      = calculate_rating_two_games(old_rating, new_agent_score)
-        agent.experiencedModel.rating = new_rating
-        
+            avg_moves_test, test_stats = sim_games(agent, agent, board_size, connect_to_win, episodes=test_episodes, doTraining=False, epsilon_greedy=False, display_results = False)
+
         if (agent.experiencedModel.games_trained) % display_stats_frequency == 0:
-            
-            print("Player Strength: ", int(new_rating))
+
             print("Training Games: ", agent.experiencedModel.games_trained)
             print("Training Loss: ", '{0:.6f}'.format(agent.experiencedModel.last_loss) )
             elapsed_time = time.time() - current_time
             print("Elapsed Time: ", '{0:.3f}'.format(elapsed_time) )
             current_time = time.time()
-            
+
             # Store current information for plots
             agent.experiencedModel.episode_list.append(agent.experiencedModel.games_trained)
-            agent.experiencedModel.rating_history.append(new_rating)
             agent.experiencedModel.loss_history.append(agent.experiencedModel.last_loss)
             agent.experiencedModel.game_length_history.append(avg_moves_test)
             agent.experiencedModel.last_game_results[agent.experiencedModel.last_game_index] = test_stats[0:3]
