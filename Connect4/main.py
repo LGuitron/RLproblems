@@ -16,7 +16,7 @@ model, model_name       = compile_model(board_size)
 #E-Greedy Agent
 epsilon_vals            = [1.0, 1.0, 0.5, 0.2, 0.1, 0.05]
 epsilon_decay           = [50000, 100000, 500000, 1000000, 1500000]
-egreedy_dqn_agent       = DQNAgent(board_size, "models/dqn_model_6_7", model, model_name, AgentType.EGreedy, epsilon_vals, epsilon_decay)
+egreedy_dqn_agent       = DQNAgent(board_size, "models/egreedy_2M", model, model_name, AgentType.EGreedy, epsilon_vals, epsilon_decay)
 
 # Random Agent
 rand_agent              = RandomAgent()
@@ -30,15 +30,15 @@ test_train_epochs       = 2000
 display_stats_frequency = 1000              # Display stats after this amount of games
 
 # Train RL agent and plot it
-train_DQN_agent(egreedy_dqn_agent, train_episodes, test_episodes, test_train_epochs, board_size, connect_to_win, display_stats_frequency)
-plot_results(egreedy_dqn_agent)
+#train_DQN_agent(egreedy_dqn_agent, train_episodes, test_episodes, test_train_epochs, board_size, connect_to_win, display_stats_frequency)
+#plot_results(egreedy_dqn_agent)
 
 # Train against random agent
 #for i in range(5):
 #    sim_games(rand_agent, dqn_agent, board_size, connect_to_win, episodes=train_episodes, display_results = True)
 
 # Play against RL agent
-# rendered_games(dqn_agent, human_agent, board_size, connect_to_win)
+rendered_games(egreedy_dqn_agent, human_agent, board_size, connect_to_win)
 
 # Test Match between agents
 #sim_games(dqn_agent, prev_dqn_agent, board_size, connect_to_win, episodes=1000, doTraining=False, is_exploring=True, display_results = True)
