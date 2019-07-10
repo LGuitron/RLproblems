@@ -86,9 +86,16 @@ def rendered_games(p1, p2, board_size, connections_to_win):
     print("Connect ", connections_to_win)
     print("----------")
 
+    
+
     while True:
         print("New Game: \n")
-        connect4 = Environment(p1,p2, board_size, connections_to_win)
+        
+        player = input("Press 1 to play as player 1, press otherwise to play as player 2: ")
+        if player == "1":
+            connect4 = Environment(p2,p1, board_size, connections_to_win)
+        else:
+            connect4 = Environment(p1,p2, board_size, connections_to_win)
         done     = False
         while not done:
             connect4.print_board()
