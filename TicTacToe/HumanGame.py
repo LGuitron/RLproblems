@@ -9,7 +9,7 @@ print("TIC TAC TOE")
 print("___________\n")
 print("Learning...")
 
-trainEpisodes = 10
+trainEpisodes = 100000
 AI = RL(0.05)
 
 Qfile = Path("Qvals.npy")
