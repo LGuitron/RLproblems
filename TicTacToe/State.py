@@ -45,8 +45,8 @@ class State:
             if(self.board[0][2] == self.board[1][1] and self.board[1][1] == self.board[2][0]):
                 return self.board[1][1]*player
         
-        #Return -0.1 reward per step taken
-        return -0.1
+        #Return 0 reward per step taken
+        return 0
     
     
     #Print on console

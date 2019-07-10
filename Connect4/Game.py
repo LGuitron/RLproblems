@@ -57,7 +57,7 @@ def sim_games(p1, p2, board_size, connections_to_win, episodes=1000, doTraining 
             if hasattr(p2, 'experiencedModel'):
                 p2.experiencedModel.games_trained += 0.5
                 p1.experiencedModel.decay_exploration()
-                
+
     if display_results:
         print("P1: " , int(stats[0]), " P2: " , int(stats[1]), " Ties: " , int(stats[2]), " A1: ", int(stats[3]), " A2: ", int(stats[4]) , "   Avg. Moves: " , '{0:.3f}'.format(moves_made/(i+1)))
     return moves_made/episodes, stats

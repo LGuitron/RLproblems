@@ -22,7 +22,7 @@ class ExperiencedModel:
         self.exploration_params = exploration_params     # Epsilon or Tempterature depending on agent type
         self.exploration_decay  = exploration_decay      # Episode at which the next decay will occur (decays are linear)
         self.exploration        = exploration            # Current value of the exploration parameter
-        
+
         self.exp_size      = exp_size
         self.exp_index     = exp_index
         self.experience    = experience
@@ -97,17 +97,13 @@ class ExperiencedModel:
             if self.games_trained < self.exploration_decay[i]:
                 break
             decay_index += 1
-        
+
         # Decay only if not in the minimum exploration value
-        if decay_index + 1 < len(self.exploration_params): 
+        if decay_index + 1 < len(self.exploration_params):
             numerator = self.exploration_params[decay_index] - self.exploration_params[decay_index+1]
             if decay_index == 0:
                 denominator = self.exploration_decay[0]
             else:
-                denominator = self.exploration_decay[decay_index] - self.exploration_decay[decay_index - 1] 
+                denominator = self.exploration_decay[decay_index] - self.exploration_decay[decay_index - 1]
             decay_value = numerator/(2*denominator)
             self.exploration -= decay_value
-        
-            
-            
-            
