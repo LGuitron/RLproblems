@@ -19,8 +19,8 @@ model, model_name       = compile_model(board_size)
 #egreedy_dqn_agent       = DQNAgent(board_size, "models/dqn_model_6_7", model, model_name, AgentType.EGreedy, epsilon_vals, epsilon_decay)
 
 
-# Softmax Agent
-temperature_vals        = [0.2, 0.050, 0.025, 0.015, 0.010, 0.0075]
+# Softmax Agent                                    |
+temperature_vals        = [0.200, 0.050, 0.025, 0.022, 0.019, 0.016]
 temperature_decay       = [50000, 100000, 500000, 1000000, 1500000]
 softmax_dqn_agent       = DQNAgent(board_size, "models/dqn_model_6_7", model, model_name, AgentType.Softmax, temperature_vals, temperature_decay)
 
@@ -33,7 +33,7 @@ human_agent             = HumanAgent()
 
 train_episodes          = 1000
 test_episodes           = 1
-test_train_epochs       = 5
+test_train_epochs       = 25
 display_stats_frequency = 1000              # Display stats after this amount of games
 
 # Train RL agent and plot it
@@ -46,4 +46,4 @@ plot_results(softmax_dqn_agent)
 # Test Match between agents
 #sim_games(dqn_agent, prev_dqn_agent, board_size, connect_to_win, episodes=1000, doTraining=False, is_exploring=True, display_results = True)
 #sim_games(dqn_agent, prev_dqn_agent, board_size, connect_to_win, episodes=2, doTraining=False, is_exploring=False, display_results = True)
-#sim_games(softmax_dqn_agent, rand_agent, board_size, connect_to_win, episodes=1000, doTraining=False, is_exploring=False, display_results = True)
+sim_games(softmax_dqn_agent, rand_agent, board_size, connect_to_win, episodes=1000, doTraining=False, is_exploring=False, display_results = True)

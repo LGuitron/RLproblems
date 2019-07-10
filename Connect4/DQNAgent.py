@@ -79,6 +79,8 @@ class DQNAgent:
 
                 sel_action = actions[action_index]
                 selected_action = True
+                self.last_softmax_prob = softmax[action_index]
+                self.last_softmax_max  = max(softmax)
             
         # Make best move according to current model if action has not been selected yet
         if not selected_action:
