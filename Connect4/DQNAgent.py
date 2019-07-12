@@ -71,6 +71,7 @@ class DQNAgent:
                 # Select action with softmax
                 random_val       = random.random()
                 cummulative_prob = 0
+                action_index     = 0
 
                 for i in range(len(softmax)):
                     cummulative_prob += softmax[i]

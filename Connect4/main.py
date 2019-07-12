@@ -33,7 +33,7 @@ human_agent             = HumanAgent()
 
 train_episodes          = 1000
 test_episodes           = 1
-test_train_epochs       = 1000
+test_train_epochs       = 2000
 display_stats_frequency = 1000              # Display stats after this amount of games
 
 
